@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
-					   xmlns:mx="library://ns.adobe.com/flex/mx">
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   creationComplete="runConfig(event)" skinClass="skins.MainTheme">
+	<fx:Script>
+		<![CDATA[
+			import com.forwardfour.Config;
+			
+			import mx.events.FlexEvent;
+			
+		//Configure the application once the window has been created
+			private function runConfig(event:FlexEvent):void {
+			//Import the Config class...
+				var config:Config = new Config();
+				
+			//... and apply its properties to configure the application
+				this.minHeight = config.minHeight;
+				this.minWidth = config.minWidth;
+				this.title = config.appName;
+			}
+		]]>
+	</fx:Script>
+	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
