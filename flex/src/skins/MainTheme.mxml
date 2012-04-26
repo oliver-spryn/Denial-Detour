@@ -33,7 +33,7 @@
       
 -->
 <s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" 
-    xmlns:fb="http://ns.adobe.com/flashbuilder/2009" alpha.disabledGroup="0.5" xmlns:mx="library://ns.adobe.com/flex/mx" >
+    xmlns:fb="http://ns.adobe.com/flashbuilder/2009" alpha.disabledGroup="0.5" xmlns:mx="library://ns.adobe.com/flex/mx">
      <fx:Metadata>[HostComponent("spark.components.WindowedApplication")]</fx:Metadata>
 
     <fx:Script fb:purpose="styling">
@@ -107,7 +107,8 @@
 	<mx:Image source="@Embed('assets/ribbon.png')" x="1984" />
 	<mx:Image source="@Embed('assets/ribbon.png')" x="2480" />
 	
-	<s:Rect height="100" left="0" right="0" top="9">
+	<!-- Header bar -->
+	<s:Rect height="35" left="0" right="0" top="9">
 		<s:fill>
 			<s:LinearGradient rotation="90">
 				<s:entries>
@@ -118,28 +119,29 @@
 		</s:fill>
 	</s:Rect>
 	
-	<s:Line top="109" width="100%">
+	<!-- Line below header bar -->
+	<s:Line top="44" width="100%">
 		<s:stroke>
 			<s:SolidColorStroke color="0xD8DDE1" weight="1"/>
 		</s:stroke>
 	</s:Line>
 
     <!-- layer 2: content + status bar -->
-    <s:Group left="0" right="0" top="0" bottom="0" minHeight="24" minWidth="0" >
+    <s:Group left="0" right="0" top="45" bottom="0" minHeight="24" minWidth="0" >
         <s:layout>
             <s:VerticalLayout gap="0"/>
         </s:layout>
 		
         <!-- content -->
         <!--- @copy spark.components.SkinnableContainer#contentGroup -->
-        <s:Group id="contentGroup" width="100%" height="100%" minHeight="0" minWidth="0"/>
+        <s:Group id="contentGroup" width="100%" bottom="0" top="110" minHeight="0" minWidth="0"/>
         
-        <!-- status bar -->
+        <!-- status bar, hidden -->
         <!--- @copy spark.components.WindowedApplication#statusBar -->
-        <s:Group id="statusBar" width="100%" minHeight="24" >
+        <s:Group id="statusBar" width="100%" height="100%" visible="false">
         
             <!-- status bar fill -->
-            <s:Rect left="0" right="0" top="0" bottom="0">
+            <s:Rect left="0" right="0" top="0" bottom="0" visible="false">
                <s:fill>
                     <s:LinearGradient rotation="90">
                         <s:GradientEntry color="0xE2E2E2" />
@@ -149,7 +151,7 @@
             </s:Rect>
             
             <!-- status bar highlight -->
-            <s:Rect left="1" right="1" top="1" bottom="0" >
+            <s:Rect left="1" right="1" top="1" bottom="0"  visible="false">
                <s:stroke>
                     <s:LinearGradientStroke rotation="90" weight="1">
                         <s:GradientEntry color="0xEAEAEA" />
@@ -161,9 +163,37 @@
             <!-- status text -->
             <!--- @copy spark.components.WindowedApplication#statusText -->
             <s:Label id="statusText" top="2" bottom="2" left="10" right="10" verticalAlign="middle" 
-                fontSize="10" color="0x585858" width="100%" maxDisplayedLines="1" />
+                fontSize="10" color="0x585858" width="100%" maxDisplayedLines="1" visible="false" />
 
         </s:Group> 
     </s:Group>
 
+	<!-- Product logo -->
+	<mx:Image alpha=".9" source="@Embed('assets/logo.png')" bottom="-125" left="10"/>
+	
+	<!-- Line above footerbar -->
+	<s:Line bottom="50" width="100%">
+		<s:stroke>
+			<s:SolidColorStroke color="0xD8DDE1" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<!-- Footer bar -->
+	<s:Rect height="45" left="0" right="0" bottom="5">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:entries>
+					<s:GradientEntry color="0xFAFAFA" />
+					<s:GradientEntry color="0xF5F5F5" />
+				</s:entries>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- Line below footerbar -->
+	<s:Line bottom="4" width="100%">
+		<s:stroke>
+			<s:SolidColorStroke color="0xD8DDE1" weight="1"/>
+		</s:stroke>
+	</s:Line>
 </s:SparkSkin>

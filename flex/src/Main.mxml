@@ -2,11 +2,22 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   creationComplete="runConfig(event)" skinClass="skins.MainTheme">
+					   creationComplete="runConfig(event)" skinClass="skins.MainTheme" currentState="Welcome" xmlns:usersservice="services.usersservice.*" xmlns:components="components.*">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	
+	<s:states>
+		<s:State name="Welcome"/>
+		<s:State name="IPAddress"/>
+		<s:State name="Login"/>
+	</s:states>
+	
 	<fx:Script>
 		<![CDATA[
 			import com.forwardfour.Config;
 			
+			import mx.controls.Alert;
 			import mx.events.FlexEvent;
 			
 		//Configure the application once the window has been created
@@ -18,11 +29,9 @@
 				this.minHeight = config.minHeight;
 				this.minWidth = config.minWidth;
 				this.title = config.appName;
-			}
+			}			
 		]]>
 	</fx:Script>
 	
-	<fx:Declarations>
-		<!-- Place non-visual elements (e.g., services, value objects) here -->
-	</fx:Declarations>
+	<components:Welcome horizontalCenter="0" top="50"/>
 </s:WindowedApplication>

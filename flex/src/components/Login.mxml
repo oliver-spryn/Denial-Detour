@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Form xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="loginFailListener(event)"
+		 defaultButton="{login}">
+	<fx:Script>
+		<![CDATA[
+			import jtd.crypto.Hash;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.validators.Validator;
+			
+			[Bindable]
+			private var loginData:String;
+			public var loggedIn:Boolean = false; //This should be accessible to the container component
+			
+			private function loginFailListener(event:FlexEvent):void {
+				this.addEventListener("loginFailed", loginFailed);
+			}
+			
+			private function loginFailed(e:Event):void {
+			//Alert the user that login has failed
+				Alert.show("Your username or password was incorrect", "Login Failed");
+				
+			//Reset the login fields
+				username.text = "";
+				password.text = "";
+			}
+			
+			private function send(event:MouseEvent):void {
+				var validation:Array = Validator.validateAll(new Array(usernameCheck, passwordCheck));
+				
+			//Nothing went wrong!
+				if (validation.length == 0) {
+				//Fire the login request to the server
+					loginResponder.token = loginSend.send();
+			//At least one form item is empty
+				} else {
+					var prompt:String;
+					
+				//Give the user appropriate feedback
+					if (validation.length == 1) {
+						prompt = "A required field was left empty";
+					} else {
+						prompt = "The log in form is empty!";
+					}
+					
+					Alert.show(prompt, "Login Error");
+				}
+			}
+
+			private function loginSendResult(event:ResultEvent):void {
+				this.loginData = event.result.login.toString();
+				
+				if (this.loginData == "true") {
+					this.loggedIn = true;
+					dispatchEvent(new Event("loggedIn"));
+				} else {
+					this.loggedIn = false;
+					dispatchEvent(new Event("loginFailed"));
+				}
+			}
+
+			private function loginSendFault(event:FaultEvent):void {
+				Alert.show("A connection to the host could not be established. Either the server is not responding or you are having networking problems.\n\nError type: " + event.fault.faultString + "\nError code: " + event.fault.faultCode, "Connection Failed");
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Metadata>
+		[Event(name="loggedIn", type="flash.events.Event")]
+		[Event(name="loginFailed", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Declarations>
+		<s:HTTPService id="loginSend" url="http://localhost/denial-detour/login.php"
+					   useProxy="false" method="POST" showBusyCursor="true">
+			<mx:request> 
+				<username>{username.text}</username> 
+				<password>{Hash.MD5(password.text)}</password> 
+			</mx:request>
+		</s:HTTPService>
+		
+		<s:CallResponder id="loginResponder" result="loginSendResult(event)" fault="loginSendFault(event)"/>
+		
+		<mx:StringValidator
+			id="usernameCheck" source="{username}" property="text"
+			triggerEvent=""
+			requiredFieldError="A username is required" />
+		
+		<mx:StringValidator
+			id="passwordCheck" source="{password}" property="text"
+			triggerEvent=""
+			requiredFieldError="A password is required" />
+	</fx:Declarations>
+	
+	<mx:FormItem label="Username:">
+		<s:TextInput id="username"/>
+	</mx:FormItem>
+	<mx:FormItem label="Password:">
+		<s:TextInput id="password" displayAsPassword="true"/>
+	</mx:FormItem>
+	<mx:FormItem>
+		<s:Button label="Login" id="login" click="send(event)"/>
+	</mx:FormItem>
+</mx:Form>

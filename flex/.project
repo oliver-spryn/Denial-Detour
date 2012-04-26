@@ -21,4 +21,11 @@
 		<nature>com.adobe.flexbuilder.project.flexnature</nature>
 		<nature>com.adobe.flexbuilder.project.actionscriptnature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>services/UsersService.php</name>
+			<type>1</type>
+			<location>C:/Web Development/wamp/www/denial-detour/system/server/flex/UsersService.php</location>
+		</link>
+	</linkedResources>
 </projectDescription>

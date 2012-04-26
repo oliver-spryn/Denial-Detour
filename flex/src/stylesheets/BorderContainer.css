@@ -1,0 +1,9 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+s|BorderContainer {
+	background-color: #FAFAFA;
+	border-color: #D8DDE1;
+	corner-radius: 10;
+}

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   borderColor="0xD8DDE1" cornerRadius="10"
+				   creationComplete="IPCheck(event)" xmlns:components="components.*">
+	<s:layout>
+		<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" />
+	</s:layout>
+	
+	<s:states>
+		<s:State name="Start"/>
+		<s:State name="IPInvalid"/>
+		<s:State name="Login"/>
+	</s:states>
+	
+	<s:backgroundFill>
+		<s:LinearGradient rotation="90">
+			<s:entries>
+				<s:GradientEntry color="0xFAFAFA" />
+				<s:GradientEntry color="0xF5F5F5" />
+			</s:entries>
+		</s:LinearGradient>
+	</s:backgroundFill>
+	
+	<fx:Script>
+		<![CDATA[
+			import jtd.crypto.Hash;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable]
+			private var IPData:String;
+			private var loggedIn:Boolean = false;
+			
+			private function IPCheck(event:FlexEvent):void {
+				IPCheckResponder.token = IPValid.send();
+			}
+			
+			private function IPCheckResult(event:ResultEvent):void {
+				IPData = event.result.IP.toString();
+				
+				if (IPData == "true") {
+					this.currentState = "Login"
+				} else {
+					this.currentState = "IPInvalid"
+				}
+			}
+			
+			private function IPCheckFail(event:FaultEvent):void {
+				Alert.show("A connection to the host could not be established. Either the server is not responding or you are having networking problems.\n\nError type: " + event.fault.faultString + "\nError code: " + event.fault.faultCode, "Connection Failed");
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:HTTPService showBusyCursor="true" id="IPValid" url="http://localhost/denial-detour/index.php"/>
+		<s:CallResponder id="IPCheckResponder" result="IPCheckResult(event)" fault="IPCheckFail(event)"/>
+	</fx:Declarations>
+	
+	<s:Label text.Start="Welcome" text.IPInvalid="Access Denied" text.Login="Login"
+			 textAlign.Start="center" fontWeight="bold" fontSize="18" minWidth="200" />
+	
+	<s:Line width="100%" excludeFrom="Start">
+		<s:stroke>
+			<s:SolidColorStroke color="0xD8DDE1" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<mx:Spacer height="5" />
+	
+	<s:Group includeIn="Start" id="drag" width="100%">
+		<mx:Image horizontalCenter="0" source="@Embed('assets/loader.gif')" />
+	</s:Group>
+	
+	<s:Group includeIn="IPInvalid">
+		<s:layout>
+			<s:VerticalLayout />
+		</s:layout>
+		
+		<s:Label text="Your IP address is not permitted to use this application. Are you at Grove City College?"/>
+		<s:Label text="You can, however, access it if you have an off-campus access code."/>
+		<s:Label text="If you have one enter it below:"/>
+		<mx:Spacer height="15" />
+		
+		<s:HGroup>
+			<s:TextInput width="250"/>
+			<s:Button label="Submit"/>
+		</s:HGroup>
+	</s:Group>
+	
+	<s:Group includeIn="Login">
+		<components:Login loggedIn="{Alert.show('Hey, we are in!')}" />
+	</s:Group>
+</s:BorderContainer>
