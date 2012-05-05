@@ -2,7 +2,9 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   creationComplete="runConfig(event)" skinClass="skins.MainTheme" currentState="Welcome" xmlns:usersservice="services.usersservice.*" xmlns:components="components.*">
+					   creationComplete="init(event)"
+					   skinClass="skins.MainTheme" currentState="Welcome" 
+					   xmlns:usersservice="services.usersservice.*" xmlns:components="components.*">
 	<s:layout>
 		<s:BasicLayout/>
 	</s:layout>
@@ -16,12 +18,13 @@
 	<fx:Script>
 		<![CDATA[
 			import com.forwardfour.Config;
+			import com.greensock.*;
 			
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
 			
 		//Configure the application once the window has been created
-			private function runConfig(event:FlexEvent):void {
+			private function init(event:FlexEvent):void {
 			//Import the Config class...
 				var config:Config = new Config();
 				
@@ -29,9 +32,50 @@
 				this.minHeight = config.minHeight;
 				this.minWidth = config.minWidth;
 				this.title = config.appName;
-			}			
+				
+				welcome.addEventListener("loggedIn", transition);
+				welcome.addEventListener("keyLoggedIn", transition);
+			}
+			
+			private function transition(e:Event):void {
+				TweenLite.to(welcome, 1, {
+					alpha : 0
+				});
+				
+				var delayPointerShow:Timer = new Timer(1000, 1);
+				delayPointerShow.start();
+				delayPointerShow.addEventListener(TimerEvent.TIMER, showPointer);
+			}
+			
+			private function showPointer(e:TimerEvent):void {
+				TweenLite.to(pointer, 1, {
+					alpha : 1
+				});
+				
+				skin.addEventListener("queryFocus", hidePointer);
+			}
+			
+			private function hidePointer(e:Event):void {
+				TweenLite.to(pointer, 1, {
+					alpha : 0
+				});
+			}
 		]]>
 	</fx:Script>
 	
-	<components:Welcome horizontalCenter="0" top="50"/>
+	<fx:Metadata>
+		[Event(name="loggedIn", type="flash.events.Event")]
+		[Event(name="keyLoggedIn", type="flash.events.Event")]
+	</fx:Metadata>
+	
+<!-- Components are in reversed order (that is, the last component to display is on top) so that
+	 the most recent component stack on top of the previously listed component -->
+	
+<!-- Instruction pointer -->
+	<mx:Image id="pointer" source="@Embed('assets/arrow.png')" alpha="0" right="125" top="40"/>
+	
+<!-- Welcome and login component -->
+	<components:Welcome id="welcome" horizontalCenter="0" top="50"
+						loggedIn="{dispatchEvent(new Event('loggedIn'))}"
+						keyLoggedIn="{dispatchEvent(new Event('keyLoggedIn'))}"/>
 </s:WindowedApplication>

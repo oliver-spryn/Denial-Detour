@@ -33,12 +33,21 @@
       
 -->
 <s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" 
-    xmlns:fb="http://ns.adobe.com/flashbuilder/2009" alpha.disabledGroup="0.5" xmlns:mx="library://ns.adobe.com/flex/mx">
+    xmlns:fb="http://ns.adobe.com/flashbuilder/2009" alpha.disabledGroup="0.5" xmlns:mx="library://ns.adobe.com/flex/mx"
+	creationComplete="init(event)">
      <fx:Metadata>[HostComponent("spark.components.WindowedApplication")]</fx:Metadata>
 
     <fx:Script fb:purpose="styling">
-		import mx.events.FlexEvent;
+		import com.greensock.*;
+		import com.greensock.easing.*;
+		
+		import components.Query;
+		
 		import flash.utils.ByteArray;
+		
+		import mx.events.FlexEvent;
+		
+		import spark.components.WindowedApplication;
 		
         /*  Define the skin elements that should not be colorized. 
          *  For WindowedApplication, border and status bar background are colorized,
@@ -51,6 +60,9 @@
          * @playerversion AIR 1.5
          * @productversion Flex 4 
          */
+		
+		public var hostComponent : WindowedApplication;
+		
         static private const exclusions:Array = ["backgroundRect", "contentGroup", "statusText"];
         
         /**
@@ -76,7 +88,82 @@
             backgroundFill.alpha = getStyle("backgroundAlpha");
             super.updateDisplayList(unscaledWidth, unscaledHeight);
         }
+		
+	/**
+	 * Listen for the main application to dispatch either a "loggedIn" or 
+	 * "keyLoggedIn" event and then expand the header. Also pick a random
+	 * image from the list of avaliable bakground images
+	 */
+		private function init(event:FlexEvent):void {
+		//Add the event listeners
+			hostComponent.addEventListener("loggedIn", expandHeader);
+			hostComponent.addEventListener("keyLoggedIn", expandHeader);
+			
+		//Generate the dynamic background
+			var random:int = Math.round(Math.random() * 4) + 1; //Pick a random whole number between 1 and 5
+			
+			switch(random) {
+				case 1 : 
+					background.source = "assets/backgrounds/download.png";
+					break;
+					
+				case 2 : 
+					background.source = "assets/backgrounds/internet.png";
+					break;
+					
+				case 3 : 
+					background.source = "assets/backgrounds/movies.png";
+					break;
+					
+				case 4 : 
+					background.source = "assets/backgrounds/network.png";
+					break;
+					
+				case 5 : 
+					background.source = "assets/backgrounds/time.png";
+					break;
+			}
+		}
+		
+	/**
+	 * Expand the header once the user has logged in
+	 */
+		private function expandHeader(e:Event):void {			
+			TweenLite.to(header, 1, {
+				height : 72
+			});
+			
+			TweenLite.to(headerLine, 1, {
+				top : 81,
+				onComplete : addTools
+			});
+		}
+		
+	/**
+	 * Add the required tools to the header
+	 */
+		private function addTools():void {
+			var query:Query = new Query();
+			query.alpha = 0;
+			query.right = 20;
+			query.top = 17;
+			query.addEventListener("queryFocus", hideHint);
+			
+			headerContainer.addElement(query);
+			
+			TweenLite.to(query, 1, {
+				alpha : 1
+			});
+		}
+		
+		private function hideHint(e:Event):void {
+			dispatchEvent(new Event("queryFocus"));
+		}
     </fx:Script>
+	
+	<fx:Metadata>
+		[Event(name="queryFocus", type="flash.events.Event")]
+	</fx:Metadata>
     
      <s:states>
         <s:State name="normal" />
@@ -108,19 +195,21 @@
 	<mx:Image source="@Embed('assets/ribbon.png')" x="2480" />
 	
 	<!-- Header bar -->
-	<s:Rect height="35" left="0" right="0" top="9">
-		<s:fill>
-			<s:LinearGradient rotation="90">
-				<s:entries>
-					<s:GradientEntry color="0xFAFAFA" />
-					<s:GradientEntry color="0xF5F5F5" />
-				</s:entries>
-			</s:LinearGradient>
-		</s:fill>
-	</s:Rect>
+	<s:Group id="headerContainer" left="0" right="0">
+		<s:Rect id="header" height="35" left="0" right="0" top="9">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:entries>
+						<s:GradientEntry color="0xFAFAFA" />
+						<s:GradientEntry color="0xF5F5F5" />
+					</s:entries>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+	</s:Group>
 	
 	<!-- Line below header bar -->
-	<s:Line top="44" width="100%">
+	<s:Line id="headerLine" top="44" width="100%">
 		<s:stroke>
 			<s:SolidColorStroke color="0xD8DDE1" weight="1"/>
 		</s:stroke>
@@ -168,8 +257,8 @@
         </s:Group> 
     </s:Group>
 
-	<!-- Product logo -->
-	<mx:Image alpha=".9" source="@Embed('assets/logo.png')" bottom="-125" left="10"/>
+	<!-- Random background image -->
+	<mx:Image id="background" alpha=".9" bottom="35" left="5"/>
 	
 	<!-- Line above footerbar -->
 	<s:Line bottom="50" width="100%">
