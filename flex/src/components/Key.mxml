@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Form xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 defaultButton="{login}" paddingLeft="0" paddingRight="0" paddingTop="0">	
+	<fx:Script>
+		<![CDATA[
+			import com.forwardfour.Config;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.events.ValidationResultEvent;
+			import mx.validators.Validator;
+			
+			[Bindable]
+			private var config:Config = new Config();
+			
+		/**
+		 * Validate the contents of the login form and check the key locally if 
+		 * validation has passed and display error feedback if the form is left 
+		 * empty
+		 */
+			private function validate(event:MouseEvent):void {
+				var validation:ValidationResultEvent = keyCheck.validate();
+				
+			//Nothing went wrong!
+				if (validation.type == ValidationResultEvent.VALID) {
+				//Check the password locally
+					if (keyInput.text === this.config.offCampusKey) {
+						dispatchEvent(new Event("keyLoggedIn"));
+						
+					//Reset the login field, just for added security
+						keyInput.text = "";
+					} else {
+					//Alert the user that login has failed
+						Alert.show("Your off campus entry key is incorrect", "Login Failed");
+						
+					//Reset the login field
+						keyInput.text = "";
+					}
+			//The form is empty
+				} else {
+					Alert.show("The log in form is empty!", "Login Error");
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Metadata>
+		[Event(name="keyLoggedIn", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Declarations>
+	<!-- Validation class -->		
+		<mx:StringValidator
+			id="keyCheck" source="{keyInput}" property="text"
+			triggerEvent=""
+			requiredFieldError="An off campus entry key is required" />
+	</fx:Declarations>	
+	
+	<s:HGroup>
+		<s:TextInput id="keyInput" width="250" displayAsPassword="true"/>
+		<s:Button label="Login" id="login" click="validate(event)"/>
+	</s:HGroup>
+</mx:Form>

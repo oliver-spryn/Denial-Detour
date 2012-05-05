@@ -2,10 +2,11 @@
 <mx:Form xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		 xmlns:s="library://ns.adobe.com/flex/spark" 
 		 xmlns:mx="library://ns.adobe.com/flex/mx"
-		 creationComplete="loginFailListener(event)"
 		 defaultButton="{login}">
 	<fx:Script>
 		<![CDATA[
+			import com.forwardfour.Config;
+			
 			import jtd.crypto.Hash;
 			
 			import mx.controls.Alert;
@@ -15,23 +16,15 @@
 			import mx.validators.Validator;
 			
 			[Bindable]
-			private var loginData:String;
-			public var loggedIn:Boolean = false; //This should be accessible to the container component
+			public var loginData:Object = new Object(); //This should be accessible to the host component
+			private var config:Config = new Config();
 			
-			private function loginFailListener(event:FlexEvent):void {
-				this.addEventListener("loginFailed", loginFailed);
-			}
-			
-			private function loginFailed(e:Event):void {
-			//Alert the user that login has failed
-				Alert.show("Your username or password was incorrect", "Login Failed");
-				
-			//Reset the login fields
-				username.text = "";
-				password.text = "";
-			}
-			
-			private function send(event:MouseEvent):void {
+		/**
+		 * Validate the contents of the login form and submit the form if validation
+		 * has passed and display error feedback if portions of the form are left 
+		 * empty
+		 */
+			private function validate(event:MouseEvent):void {
 				var validation:Array = Validator.validateAll(new Array(usernameCheck, passwordCheck));
 				
 			//Nothing went wrong!
@@ -53,18 +46,38 @@
 				}
 			}
 
+		/**
+		 * Wait for the results from the login request to comeb back from the server,
+		 * and be prepared to handle: 
+		 *  - the results of a successful login
+		 *  - the results of a failed login
+		 */
 			private function loginSendResult(event:ResultEvent):void {
-				this.loginData = event.result.login.toString();
-				
-				if (this.loginData == "true") {
-					this.loggedIn = true;
+			//Login was successful
+				if (event.result.login.status.toString() == "true") {
 					dispatchEvent(new Event("loggedIn"));
+					
+				//Reset the login fields, just for added security
+					username.text = "";
+					password.text = "";
+					
+				//Extract the user information from the XML and put it in a variable for global use
+					this.loginData.first = event.result.login.info.first.toString();
+					this.loginData.last = event.result.login.info.last.toString();
+			//Login was unsuccessful
 				} else {
-					this.loggedIn = false;
-					dispatchEvent(new Event("loginFailed"));
+				//Alert the user that login has failed
+					Alert.show("Your username or password was incorrect", "Login Failed");
+					
+				//Reset the login fields
+					username.text = "";
+					password.text = "";
 				}
 			}
-
+			
+		/**
+		 * Indicate that an error has taken place when communicating with the server
+		 */
 			private function loginSendFault(event:FaultEvent):void {
 				Alert.show("A connection to the host could not be established. Either the server is not responding or you are having networking problems.\n\nError type: " + event.fault.faultString + "\nError code: " + event.fault.faultCode, "Connection Failed");
 			}
@@ -73,11 +86,11 @@
 	
 	<fx:Metadata>
 		[Event(name="loggedIn", type="flash.events.Event")]
-		[Event(name="loginFailed", type="flash.events.Event")]
 	</fx:Metadata>
 	
 	<fx:Declarations>
-		<s:HTTPService id="loginSend" url="http://localhost/denial-detour/login.php"
+	<!-- Login service operations -->
+		<s:HTTPService id="loginSend" url="{this.config.loginScript}"
 					   useProxy="false" method="POST" showBusyCursor="true">
 			<mx:request> 
 				<username>{username.text}</username> 
@@ -87,6 +100,7 @@
 		
 		<s:CallResponder id="loginResponder" result="loginSendResult(event)" fault="loginSendFault(event)"/>
 		
+	<!-- Validation classes -->
 		<mx:StringValidator
 			id="usernameCheck" source="{username}" property="text"
 			triggerEvent=""
@@ -105,6 +119,6 @@
 		<s:TextInput id="password" displayAsPassword="true"/>
 	</mx:FormItem>
 	<mx:FormItem>
-		<s:Button label="Login" id="login" click="send(event)"/>
+		<s:Button label="Login" id="login" click="validate(event)"/>
 	</mx:FormItem>
 </mx:Form>
