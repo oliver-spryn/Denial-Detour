@@ -24,6 +24,12 @@ package com.forwardfour {
 		public var appName:String = "Denial Detour";
 		public var minHeight:int = 600;
 		public var minWidth:int = 900;
+		public var passwordSalt:String = "&f9@jGDL!f76";
+		public var offCampusKey:String = "forwardfour_#-@widl12*!vuiD0_";
+		
+		public var initScript:String = "http://localhost/denial-detour/app/initialize.php";
+		public var loginScript:String = "http://localhost/denial-detour/app/login.php";
+		public var fetch:String = "http://localhost/denial-detour/app/fetch.php";
 		
 		public function Config() {
 		//Nothing to do!
